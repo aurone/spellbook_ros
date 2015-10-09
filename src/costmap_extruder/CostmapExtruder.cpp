@@ -1,24 +1,37 @@
 #include "CostmapExtruder.h"
+
 // #include <leatherman/print.h>
 #include <octomap_msgs/conversions.h>
 #include <octomap_ros/conversions.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <spellbook/stringifier/stringifier.h>
 #include <spellbook/msg_utils/msg_utils.h>
 
-CostmapExtruder::CostmapExtruder(std::int8_t obs_threshold, bool unknown_obstacles) :
+CostmapExtruder::CostmapExtruder(
+    std::int8_t obs_threshold,
+    bool unknown_obstacles)
+:
     unknown_obstacles_(unknown_obstacles),
     obs_threshold_(obs_threshold)
 {
 }
 
-bool CostmapExtruder::extrude(const nav_msgs::OccupancyGrid& grid, double extrusion, octomap_msgs::Octomap& map)
+bool CostmapExtruder::extrude(
+    const nav_msgs::OccupancyGrid& grid,
+    double extrusion,
+    octomap_msgs::Octomap& map)
 {
-    moveit_msgs::CollisionMap collision_map = extrude_to_collision_map(grid, extrusion);
+    moveit_msgs::CollisionObject collision_map =
+            extrude_to_collision_map(grid, extrusion);
 
     // convert the collision map to a point cloud
-    ROS_INFO("Creating Octomap from Collision Map");
-    ROS_INFO("  %zd oriented bounding box cells", collision_map.boxes.size());
-    const double res = collision_map.boxes.front().extents.x;
+    ROS_INFO("Creating Octomap from Collision Object");
+    ROS_INFO("  %zd solid primitives (assumed boxes)", collision_map.primitives.size());
+
+    const shape_msgs::SolidPrimitive& first_box =
+            collision_map.primitives.front();
+    assert(!first_box.dimensions.empty());
+    const double res = first_box.dimensions[0];
     ROS_INFO("  Resolution: %0.3f", res);
 
     octomap::Pointcloud octomap_cloud;
@@ -47,22 +60,29 @@ bool CostmapExtruder::extrude(
     pcl::PointCloud<pcl::PointXYZI>& cloud)
 {
     // create 3-d collision map via extrusion
-    moveit_msgs::CollisionMap collision_map = extrude_to_collision_map(grid, extrusion);
+    moveit_msgs::CollisionObject collision_map =
+            extrude_to_collision_map(grid, extrusion);
 
     // convert the collision map to a point cloud
     ROS_INFO("Creating Octomap from Collision Map");
-    ROS_INFO("  %zd oriented bounding box cells", collision_map.boxes.size());
-    const double res = collision_map.boxes.front().extents.x; // note: cubic cell assumption
+    ROS_INFO("  %zd solid primitives (assumed boxes)", collision_map.primitives.size());
+
+    const shape_msgs::SolidPrimitive& first_box =
+            collision_map.primitives.front();
+    assert(!first_box.dimensions.empty());
+    const double res = first_box.dimensions[0]; // note: cubic cell assumption
     ROS_INFO("  Resolution: %0.3f", res);
 
-    cloud.header = grid.header; // inherit frame_id and stamp...and seq
+    // inherit frame_id and stamp...and seq
+    cloud.header = pcl_conversions::toPCL(grid.header); 
 
-    cloud.reserve(collision_map.boxes.size());
-    for (const moveit_msgs::OrientedBoundingBox& box : collision_map.boxes) {
+    cloud.reserve(collision_map.primitives.size());
+
+    for (const geometry_msgs::Pose& pose : collision_map.primitive_poses) {
         pcl::PointXYZI point;
-        point.x = box.pose.position.x;
-        point.y = box.pose.position.y;
-        point.z = box.pose.position.z;
+        point.x = pose.position.x;
+        point.y = pose.position.y;
+        point.z = pose.position.z;
         point.intensity = 100;
         cloud.push_back(point);
     }
@@ -70,12 +90,14 @@ bool CostmapExtruder::extrude(
     return true;
 }
 
-moveit_msgs::CollisionMap
-CostmapExtruder::extrude_to_collision_map(const nav_msgs::OccupancyGrid& grid, double extrusion) const
+moveit_msgs::CollisionObject
+CostmapExtruder::extrude_to_collision_map(
+    const nav_msgs::OccupancyGrid& grid,
+    double extrusion) const
 {
     ROS_INFO("Extruding Occupancy Grid");
 
-    moveit_msgs::CollisionMap cmap;
+    moveit_msgs::CollisionObject cmap;
 
     cmap.header.seq = 0;
     cmap.header.stamp = ros::Time(0);
@@ -90,7 +112,8 @@ CostmapExtruder::extrude_to_collision_map(const nav_msgs::OccupancyGrid& grid, d
         for (int y = 0; y < height; ++y) {
             // only add occuped cells to the collision map
             bool obstacle =
-                (grid.data[y * width + x] >= obs_threshold_) || (unknown_obstacles_ && grid.data[y * width + x] < 0);
+                (grid.data[y * width + x] >= obs_threshold_) ||
+                (unknown_obstacles_ && grid.data[y * width + x] < 0);
 
             if (!obstacle) {
                 continue;
@@ -103,15 +126,20 @@ CostmapExtruder::extrude_to_collision_map(const nav_msgs::OccupancyGrid& grid, d
             for (double z = 0.0; z <= extrusion; z += res) {
                 const double& map_z = z + 0.5 * res;
 
+                // construct
+                geometry_msgs::Point32 box_extents(geometry_msgs::CreatePoint32(res, res, res));
+                shape_msgs::SolidPrimitive sp;
+                sp.type = shape_msgs::SolidPrimitive::BOX;
+                sp.dimensions.resize(3);
+                sp.dimensions[shape_msgs::SolidPrimitive::BOX_X] = box_extents.x;
+                sp.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = box_extents.y;
+                sp.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = box_extents.z;
+                cmap.primitives.push_back(sp);
+
                 geometry_msgs::Point box_pos(geometry_msgs::CreatePoint(map_x, map_y, map_z));
                 geometry_msgs::Quaternion box_rot(geometry_msgs::IdentityQuaternion());
                 geometry_msgs::Pose box_pose(geometry_msgs::CreatePose(box_pos, box_rot));
-                geometry_msgs::Point32 box_extents(geometry_msgs::CreatePoint32(res, res, res));
-
-                moveit_msgs::OrientedBoundingBox bb;
-                bb.pose = box_pose;
-                bb.extents = box_extents;
-                cmap.boxes.push_back(bb);
+                cmap.primitive_poses.push_back(box_pose);
             }
         }
     }
@@ -124,43 +152,50 @@ CostmapExtruder::extrude_to_collision_map(const nav_msgs::OccupancyGrid& grid, d
     return cmap;
 }
 
-moveit_msgs::OrientedBoundingBox CostmapExtruder::get_bbx(const moveit_msgs::CollisionMap& collision_map) const
+moveit_msgs::OrientedBoundingBox
+CostmapExtruder::get_bbx(
+    const moveit_msgs::CollisionObject& collision_map) const
 {
     moveit_msgs::OrientedBoundingBox bbx;
 
-    if (collision_map.boxes.empty()) {
+    if (collision_map.primitives.empty()) {
         bbx.extents = geometry_msgs::CreatePoint32(0.0, 0.0, 0.0);
         bbx.pose = geometry_msgs::IdentityPose();
         return bbx;
     }
 
-    const auto& first = collision_map.boxes.front();
-    double min_x = first.pose.position.x;
-    double min_y = first.pose.position.y;
-    double min_z = first.pose.position.z;
-    double max_x = first.pose.position.x;
-    double max_y = first.pose.position.y;
-    double max_z = first.pose.position.z;
+    assert(!collision_map.primitive_poses.empty());
 
-    for (const auto& obbx : collision_map.boxes) {
-        if (obbx.pose.position.x < min_x) {
-            min_x = obbx.pose.position.x;
+    const geometry_msgs::Pose& first_pose =
+            collision_map.primitive_poses.front();
+
+    double min_x = first_pose.position.x;
+    double min_y = first_pose.position.y;
+    double min_z = first_pose.position.z;
+
+    double max_x = first_pose.position.x;
+    double max_y = first_pose.position.y;
+    double max_z = first_pose.position.z;
+
+    for (const geometry_msgs::Pose& pose : collision_map.primitive_poses) {
+        if (pose.position.x < min_x) {
+            min_x = pose.position.x;
         }
-        if (obbx.pose.position.y < min_y) {
-            min_y = obbx.pose.position.y;
+        if (pose.position.y < min_y) {
+            min_y = pose.position.y;
         }
-        if (obbx.pose.position.z < min_z) {
-            min_z = obbx.pose.position.z;
+        if (pose.position.z < min_z) {
+            min_z = pose.position.z;
         }
 
-        if (obbx.pose.position.x > max_x) {
-            max_x = obbx.pose.position.x;
+        if (pose.position.x > max_x) {
+            max_x = pose.position.x;
         }
-        if (obbx.pose.position.y > max_y) {
-            max_y = obbx.pose.position.y;
+        if (pose.position.y > max_y) {
+            max_y = pose.position.y;
         }
-        if (obbx.pose.position.z > max_z) {
-            max_z = obbx.pose.position.z;
+        if (pose.position.z > max_z) {
+            max_z = pose.position.z;
         }
     }
 
@@ -182,10 +217,11 @@ void CostmapExtruder::log_octomap(const octomap::OcTree& octree) const
     ROS_INFO("  Memory Usage: %zd bytes", octree.memoryUsage());
     ROS_INFO("  Num Leaf Nodes: %zd", octree.getNumLeafNodes());
 
-    unsigned num_thresholded, num_other;
-    octree.calcNumThresholdedNodes(num_thresholded, num_other);
-    ROS_INFO("  Num Thresholded Nodes: %u", num_thresholded);
-    ROS_INFO("  Num Other Nodes: %u", num_other);
+    // TODO: where has this function gone?
+//    unsigned num_thresholded, num_other;
+//    octree.calcNumThresholdedNodes(num_thresholded, num_other);
+//    ROS_INFO("  Num Thresholded Nodes: %u", num_thresholded);
+//    ROS_INFO("  Num Other Nodes: %u", num_other);
 
     const octomap::point3d octomap_min = octree.getBBXMin();
     const octomap::point3d octomap_max = octree.getBBXMax();
@@ -221,11 +257,17 @@ void CostmapExtruder::log_octomap(const octomap::OcTree& octree) const
     ROS_INFO("  Tree Type: %s", octree.getTreeType().c_str());
 }
 
-void CostmapExtruder::convert(const moveit_msgs::CollisionMap& collision_map, octomap::Pointcloud& octomap_cloud) const
+void CostmapExtruder::convert(
+    const moveit_msgs::CollisionObject& cmap,
+    octomap::Pointcloud& octomap_cloud) const
 {
     octomap_cloud.clear();
-    octomap_cloud.reserve(collision_map.boxes.size());
-    for (const moveit_msgs::OrientedBoundingBox& box : collision_map.boxes) {
-        octomap_cloud.push_back(box.pose.position.x, box.pose.position.y, box.pose.position.z);
+    octomap_cloud.reserve(cmap.primitives.size());
+    assert(cmap.primitives.size() == cmap.primitive_poses.size());
+    for (size_t i = 0; i < cmap.primitives.size(); ++i)
+    {
+        const geometry_msgs::Pose& pose = cmap.primitive_poses[i];
+        octomap_cloud.push_back(
+                pose.position.x, pose.position.y, pose.position.z);
     }
 }

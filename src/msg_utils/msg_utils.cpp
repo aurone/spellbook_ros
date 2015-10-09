@@ -1,4 +1,4 @@
-#include <spellbook_ros/msg_utils/msg_utils.h>
+#include <spellbook/msg_utils/msg_utils.h>
 
 #include <Eigen/Dense>
 #include <algorithm>

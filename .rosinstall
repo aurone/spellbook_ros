@@ -1,0 +1,1 @@
+- git: {local-name: extern/spellbook, uri: 'https://github.com/aurone/spellbook.git', version: c3ab36}
