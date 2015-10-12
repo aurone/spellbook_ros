@@ -42,6 +42,7 @@ catkin_package(
         extern/spellbook/spellbook/src/include
     LIBRARIES
         msg_utils
+        costmap_extruder
     CATKIN_DEPENDS
         sbpl_geometry_utils
     DEPENDS

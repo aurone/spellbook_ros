@@ -1,4 +1,4 @@
-#include "CostmapExtruder.h"
+#include <spellbook/costmap_extruder/CostmapExtruder.h>
 
 // #include <leatherman/print.h>
 #include <octomap_msgs/conversions.h>

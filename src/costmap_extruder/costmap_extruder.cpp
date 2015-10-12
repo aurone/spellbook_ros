@@ -1,8 +1,10 @@
 #include <cassert>
+
 #include <nav_msgs/OccupancyGrid.h>
 #include <octomap_msgs/Octomap.h>
 #include <ros/ros.h>
-#include "CostmapExtruder.h"
+
+#include <spellbook/costmap_extruder/CostmapExtruder.h>
 
 nav_msgs::OccupancyGrid::ConstPtr TheOnlyOccupancyGrid;
 
