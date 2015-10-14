@@ -1,0 +1,3 @@
+[submodule "extern/spellbook"]
+	path = extern/spellbook
+	url = https://github.com/aurone/spellbook.git
