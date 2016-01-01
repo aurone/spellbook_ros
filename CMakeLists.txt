@@ -64,3 +64,8 @@ include_directories(include)
 link_directories(${openni_LIBRARY_DIRS})
 
 add_subdirectory(src)
+
+# NOTE: opting out of CATKIN_PACKAGE_INCLUDE_DESTINATION here, which will rename
+# the base include directory to the project name, "spellbook_ros", rather than
+# "spellbook"
+install(DIRECTORY include/spellbook DESTINATION include)
