@@ -3,15 +3,12 @@ project(spellbook_ros)
 
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/extern/spellbook/cmake/Modules")
-message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-
-include(EnableCXX11)
+include(extern/spellbook/cmake/Modules/EnableCXX11.cmake)
 enable_cxx11()
 
 find_package(Boost REQUIRED system thread)
 
-include(LocateEigen)
+include(extern/spellbook/cmake/Modules/LocateEigen.cmake)
 locate_eigen()
 
 find_package(
