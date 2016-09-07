@@ -300,20 +300,25 @@ bool extract_xml_value(XmlRpc::XmlRpcValue& value, std::string& sout)
 bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Point& p)
 {
     std::map<std::string, double> params;
-    bool success = extract_xml_value(value, params);
-    if (!success ||
-        params.find("x") == params.end() ||
-        params.find("y") == params.end() ||
-        params.find("z") == params.end())
-    {
+    if (!extract_xml_value(value, params)) {
         return false;
     }
-    else {
-        p.x = params["x"];
-        p.y = params["y"];
-        p.z = params["z"];
-        return true;
+
+    auto xit = params.find("x");
+    auto yit = params.find("y");
+    auto zit = params.find("z");
+
+    if (xit != params.end()) {
+        p.x = xit->second;
     }
+    if (xit != params.end()) {
+        p.y = yit->second;
+    }
+    if (xit != params.end()) {
+        p.z = zit->second;
+    }
+
+    return true;
 }
 
 bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Quaternion& q)
