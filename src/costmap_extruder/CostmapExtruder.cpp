@@ -4,7 +4,9 @@
 #include <octomap_msgs/conversions.h>
 #include <octomap_ros/conversions.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <spellbook/geometry_msgs/geometry_msgs.h>
 #include <spellbook/stringifier/stringifier.h>
+#include <spellbook/moveit_msgs/moveit_msgs.h>
 #include <spellbook/msg_utils/msg_utils.h>
 
 CostmapExtruder::CostmapExtruder(
@@ -74,7 +76,7 @@ bool CostmapExtruder::extrude(
     ROS_INFO("  Resolution: %0.3f", res);
 
     // inherit frame_id and stamp...and seq
-    cloud.header = pcl_conversions::toPCL(grid.header); 
+    cloud.header = pcl_conversions::toPCL(grid.header);
 
     cloud.reserve(collision_map.primitives.size());
 

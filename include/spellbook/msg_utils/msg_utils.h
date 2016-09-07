@@ -21,26 +21,32 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <XmlRpc.h>
 
-namespace msg_utils
-{
+namespace msg_utils {
 
-/// @brief Return whether two vectors contain the same set of elements.
-template <typename T>
-bool vector_sets_equal(const std::vector<T>& u, const std::vector<T>& v);
+/// \brief Return whether a joint state contains a given set of joints
+bool contains_joints(
+    const sensor_msgs::JointState& joint_state,
+    const std::vector<std::string>& joints);
 
-/// @brief Return whether a joint state contains a given set of joints
-bool contains_joints(const sensor_msgs::JointState& joint_state, const std::vector<std::string>& joints);
+/// \brief Return whether a joint state contains exactly a given set of joints
+bool contains_only_joints(
+    const sensor_msgs::JointState& joint_state,
+    const std::vector<std::string>& joints);
 
-/// @brief Return whether a joint state contains exactly a given set of joints
-bool contains_only_joints(const sensor_msgs::JointState& joint_state, const std::vector<std::string>& joints);
+/// \brief Reorder the joints in a joint state message.
+/// \return false if the joint state contains joints other than those specified
+///     in the joint order; true otherwise
+bool reorder_joints(
+    sensor_msgs::JointState& joint_state,
+    const std::vector<std::string>& joint_order);
 
-/// @brief Reorder the joints in a joint state message.
-/// @return false if the joint state contains joints other than those specified in the joint order; true otherwise
-bool reorder_joints(sensor_msgs::JointState& joint_state, const std::vector<std::string>& joint_order);
+bool reorder_joints(
+    trajectory_msgs::JointTrajectory& joint_trajectory,
+    const std::vector<std::string>& joint_order);
 
-bool reorder_joints(trajectory_msgs::JointTrajectory& joint_trajectory, const std::vector<std::string>& joint_order);
-
-int get_joint_index(const sensor_msgs::JointState& joint_state, const std::string& name);
+int get_joint_index(
+    const sensor_msgs::JointState& joint_state,
+    const std::string& name);
 
 visualization_msgs::Marker create_arrow_marker(const geometry_msgs::Vector3 &scale);
 visualization_msgs::MarkerArray create_triad_marker_arr(const geometry_msgs::Vector3& scale);
@@ -96,28 +102,6 @@ void convert(const Eigen::Affine3d& from, tf::Transform& to);
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-bool vector_sets_equal(const std::vector<T>& u, const std::vector<T>& v)
-{
-    if (u.size() != v.size()) {
-        return false;
-    }
-
-    for (size_t i = 0; i < u.size(); ++i) {
-        if (std::count(v.begin(), v.end(), u[i]) != 1) {
-            return false;
-        }
-    }
-
-    for (size_t i = 0; i < v.size(); ++i) {
-        if (std::count(u.begin(), u.end(), v[i]) != 1) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-template <typename T>
 bool extract_xml_value(XmlRpc::XmlRpcValue& value, std::vector<T>& vout)
 {
     if (value.getType() != XmlRpc::XmlRpcValue::TypeArray) {
@@ -166,7 +150,7 @@ bool extract_xml_value(XmlRpc::XmlRpcValue& value, std::map<std::string, T>& mou
 template <typename T>
 bool download_param(const ros::NodeHandle& nh, const std::string& param_name, T& tout)
 {
-    ROS_INFO("Retrieving parameter %s", param_name.c_str());
+    ROS_DEBUG("Retrieving parameter %s", param_name.c_str());
 
     XmlRpc::XmlRpcValue value_array;
     if (!nh.getParam(param_name, value_array)) {
@@ -223,45 +207,5 @@ bool vector_mul(const std::vector<T>& u, const std::vector<T>& v, std::vector<T>
 }
 
 } // namespace msg_utils
-
-namespace geometry_msgs
-{
-
-// Because messages don't come with real constructors
-Vector3 CreateVector3(double x, double y, double z);
-const Vector3 ZeroVector3();
-
-Point CreatePoint(double x, double y, double z);
-const Point ZeroPoint();
-
-Point32 CreatePoint32(float x, float y, float z);
-const Point32 ZeroPoint32();
-
-Quaternion CreateQuaternion(double w, double x, double y, double z);
-const Quaternion IdentityQuaternion();
-
-Pose CreatePose(const Point& position, const Quaternion& orientation);
-const Pose IdentityPose();
-
-} // namespace geometry_msgs
-
-namespace std_msgs
-{
-
-ColorRGBA CreateColorRGBA(float r, float g, float b, float a);
-
-const ColorRGBA BlackColorRGBA(float a = 1.0f);
-const ColorRGBA RedColorRGBA(float a = 1.0f);
-const ColorRGBA GreenColorRGBA(float a = 1.0f);
-const ColorRGBA BlueColorRGBA(float a = 1.0f);
-const ColorRGBA YellowColorRGBA(float a = 1.0f);
-const ColorRGBA CyanColorRGBA(float a = 1.0f);
-const ColorRGBA MagentaColorRGBA(float a = 1.0f);
-const ColorRGBA WhiteColorRGBA(float a = 1.0f);
-
-Header CreateHeader(uint32_t seq, const ros::Time& stamp, const std::string& frame_id);
-
-} // namespace std_msgs
-
 
 #endif

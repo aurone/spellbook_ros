@@ -5,8 +5,30 @@
 #include <sbpl_geometry_utils/utils.h>
 #include <tf/transform_datatypes.h>
 
-namespace msg_utils
+namespace msg_utils {
+
+/// @brief Return whether two vectors contain the same set of elements.
+template <typename T>
+bool vector_sets_equal(const std::vector<T>& u, const std::vector<T>& v)
 {
+    if (u.size() != v.size()) {
+        return false;
+    }
+
+    std::vector<T> uc(u);
+    std::vector<T> vc(v);
+
+    std::sort(uc.begin(), uc.end());
+    std::sort(vc.begin(), vc.end());
+
+    std::vector<T> U;
+    std::set_symmetric_difference(
+            uc.begin(), uc.end(),
+            vc.begin(), vc.end(),
+            std::back_inserter(U));
+
+    return U.empty();
+}
 
 bool contains_joints(const sensor_msgs::JointState& joint_state, const std::vector<std::string>& joints)
 {
@@ -378,142 +400,3 @@ void convert(const Eigen::Affine3d& from, tf::Transform& to)
 }
 
 } // namespace msg_utils
-
-namespace geometry_msgs
-{
-
-Vector3 CreateVector3(double x, double y, double z)
-{
-    Vector3 v;
-    v.x = x;
-    v.y = y;
-    v.z = z;
-    return v;
-}
-
-const Vector3 ZeroVector3()
-{
-    return CreateVector3(0.0, 0.0, 0.0);
-}
-
-Point CreatePoint(double x, double y, double z)
-{
-    Point p;
-    p.x = x;
-    p.y = y;
-    p.z = z;
-    return p;
-}
-
-const Point ZeroPoint()
-{
-    return CreatePoint(0.0, 0.0, 0.0);
-}
-
-Point32 CreatePoint32(float x, float y, float z)
-{
-    Point32 p;
-    p.x = x;
-    p.y = y;
-    p.z = z;
-    return p;
-}
-
-const Point32 ZeroPoint32()
-{
-    return CreatePoint32(0.0f, 0.0f, 0.0f);
-}
-
-Quaternion CreateQuaternion(double w, double x, double y, double z)
-{
-    Quaternion q;
-    q.w = w;
-    q.x = x;
-    q.y = y;
-    q.z = z;
-    return q;
-}
-
-const Quaternion IdentityQuaternion()
-{
-    return CreateQuaternion(1.0, 0.0, 0.0, 0.0);
-}
-
-Pose CreatePose(const Point& position, const Quaternion& orientation)
-{
-    Pose p;
-    p.position = position;
-    p.orientation = orientation;
-    return p;
-}
-
-const Pose IdentityPose()
-{
-    return CreatePose(ZeroPoint(), IdentityQuaternion());
-}
-
-} // namespace geometry_msgs
-
-namespace std_msgs
-{
-
-ColorRGBA CreateColorRGBA(float r, float g, float b, float a)
-{
-    ColorRGBA color;
-    color.r = r;
-    color.g = g;
-    color.b = b;
-    color.a = a;
-    return color;
-}
-
-const ColorRGBA BlackColorRGBA(float a)
-{
-    return CreateColorRGBA(0.0f, 0.0f, 0.0f, a);
-}
-
-const ColorRGBA RedColorRGBA(float a)
-{
-    return CreateColorRGBA(1.0f, 0.0f, 0.0f, a);
-}
-
-const ColorRGBA GreenColorRGBA(float a)
-{
-    return CreateColorRGBA(0.0f, 1.0f, 0.0f, a);
-}
-
-const ColorRGBA BlueColorRGBA(float a)
-{
-    return CreateColorRGBA(0.0f, 0.0f, 1.0f, a);
-}
-
-const ColorRGBA YellowColorRGBA(float a)
-{
-    return CreateColorRGBA(1.0f, 1.0f, 0.0f, a);
-}
-
-const ColorRGBA CyanColorRGBA(float a)
-{
-    return CreateColorRGBA(0.0f, 1.0f, 1.0f, a);
-}
-
-const ColorRGBA MagentaColorRGBA(float a)
-{
-    return CreateColorRGBA(1.0f, 0.0f, 1.0f, a);
-}
-
-const ColorRGBA WhiteColorRGBA(float a)
-{
-    return CreateColorRGBA(1.0f, 1.0f, 1.0f, a);
-}
-
-Header CreateHeader(uint32_t seq, const ros::Time& stamp, const std::string& frame_id)
-{
-    Header header;
-    header.seq = seq;
-    header.stamp = stamp;
-    header.frame_id = frame_id;
-    return header;
-}
-
-}

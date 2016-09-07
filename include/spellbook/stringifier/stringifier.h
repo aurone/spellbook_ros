@@ -10,7 +10,6 @@
 #include <geometry_msgs/Point32.h>
 #include <sbpl_geometry_utils/utils.h>
 #include <visualization_msgs/Marker.h>
-#include <moveit_msgs/OrientedBoundingBox.h>
 
 ////////////////////////////////
 /// Because, let's be honest ///
@@ -25,12 +24,6 @@ std::string to_string(const Eigen::Affine3d& transform);
 std::string to_string(const Eigen::Vector2d& v);
 std::string to_string(const Eigen::Vector3d& v);
 std::string to_string(const Eigen::AngleAxisd& aa);
-
-std::string to_string(const geometry_msgs::Quaternion& quat);
-std::string to_string(const geometry_msgs::Point& point);
-std::string to_string(const geometry_msgs::Point32& point);
-std::string to_string(const geometry_msgs::Pose& pose);
-std::string to_string(const moveit_msgs::OrientedBoundingBox& bbx);
 
 template <typename T, std::size_t N>
 std::string to_string(const std::array<T, N>& arr);
@@ -126,41 +119,6 @@ inline std::string to_string(const std::array<double, N>& arr)
         ss << arr[i] << ' ';
     }
     ss << ')';
-    return ss.str();
-}
-
-inline std::string to_string(const geometry_msgs::Quaternion& quat)
-{
-    std::stringstream ss;
-    ss << "(" << quat.w << ", " << quat.x << ", " << quat.y << ", " << quat.z << ")";
-    return ss.str();
-}
-
-inline std::string to_string(const geometry_msgs::Point& point)
-{
-    std::stringstream ss;
-    ss << "(" << point.x << ", " << point.y << ", " << point.z << ")";
-    return ss.str();
-}
-
-inline std::string to_string(const geometry_msgs::Point32& point)
-{
-    std::stringstream ss;
-    ss << "(" << point.x << ", " << point.y << ", " << point.z << ")";
-    return ss.str();
-}
-
-inline std::string to_string(const geometry_msgs::Pose& pose)
-{
-    std::stringstream ss;
-    ss << "{ position: " << to_string(pose.position) << ", " << "orientation: " << to_string(pose.orientation) << " }";
-    return ss.str();
-}
-
-inline std::string to_string(const moveit_msgs::OrientedBoundingBox& bbx)
-{
-    std::stringstream ss;
-    ss << "{ pose: " << to_string(bbx.pose) << ", extents: " << to_string(bbx.extents) << " }";
     return ss.str();
 }
 
