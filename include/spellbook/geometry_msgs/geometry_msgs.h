@@ -6,6 +6,7 @@
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Vector3.h>
 
@@ -26,11 +27,11 @@ const Quaternion IdentityQuaternion();
 Pose CreatePose(const Point& position, const Quaternion& orientation);
 const Pose IdentityPose();
 
-std::string to_string(const PoseStamped& p);
 std::string to_string(const Quaternion& quat);
 std::string to_string(const Point& point);
 std::string to_string(const Point32& point);
 std::string to_string(const Pose& pose);
+std::string to_string(const PoseStamped& pose);
 
 } // namespace geometry_msgs
 

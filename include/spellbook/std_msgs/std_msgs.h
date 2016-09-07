@@ -24,6 +24,9 @@ Header CreateHeader(
     const ros::Time& stamp,
     const std::string& frame_id);
 
+std::string to_string(const ColorRGBA& color);
+std::string to_string(const Header& header);
+
 } // namespace std_msgs
 
 #include "detail/std_msgs.h"

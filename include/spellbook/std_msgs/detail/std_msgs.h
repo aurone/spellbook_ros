@@ -77,6 +77,22 @@ Header CreateHeader(
     return header;
 }
 
+inline
+std::string to_string(const ColorRGBA& color)
+{
+    std::stringstream ss;
+    ss << "{ r: " << color.r << ", g: " << color.g << ", b: " << color.b << ", a: " << color.a << " }";
+    return ss.str();
+}
+
+inline
+std::string to_string(const Header& header)
+{
+    std::stringstream ss;
+    ss << "{ seq: " << header.seq << ", stamp: " << header.stamp << ", frame_id: " << header.frame_id << " }";
+    return ss.str();
+}
+
 } // namespace std_msgs
 
 #endif

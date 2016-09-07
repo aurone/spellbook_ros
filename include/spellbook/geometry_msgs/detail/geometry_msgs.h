@@ -3,6 +3,8 @@
 
 #include "../geometry_msgs.h"
 
+#include <spellbook/std_msgs/std_msgs.h>
+
 namespace geometry_msgs {
 
 inline
@@ -86,12 +88,6 @@ const Pose IdentityPose()
 }
 
 inline
-std::string to_string(const PoseStamped& p)
-{
-
-}
-
-inline
 std::string to_string(const Quaternion& quat)
 {
     std::stringstream ss;
@@ -120,6 +116,14 @@ std::string to_string(const Pose& pose)
 {
     std::stringstream ss;
     ss << "{ position: " << to_string(pose.position) << ", " << "orientation: " << to_string(pose.orientation) << " }";
+    return ss.str();
+}
+
+inline
+std::string to_string(const PoseStamped& pose)
+{
+    std::stringstream ss;
+    ss << "{ header: " << to_string(pose.header) << ", pose: " << to_string(pose.pose) << "}";
     return ss.str();
 }
 
