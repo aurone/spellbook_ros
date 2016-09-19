@@ -365,6 +365,33 @@ bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Pose& p)
     }
 }
 
+bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Vector3& v)
+{
+    if (value.getType() != XmlRpc::XmlRpcValue::TypeStruct) {
+        return false;
+    }
+
+    std::map<std::string, double> params;
+    if (!extract_xml_value(value, params)) {
+        return false;
+    }
+
+    auto xit = params.find("x");
+    auto yit = params.find("y");
+    auto zit = params.find("z");
+
+    if (xit != params.end()) {
+        v.x = xit->second;
+    }
+    if (xit != params.end()) {
+        v.y = yit->second;
+    }
+    if (xit != params.end()) {
+        v.z = zit->second;
+    }
+    return true;
+}
+
 std::vector<double> to_degrees(const std::vector<double>& v)
 {
     std::vector<double> v_degs(v.size());

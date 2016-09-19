@@ -60,6 +60,11 @@ bool extract_xml_value(XmlRpc::XmlRpcValue& value, int& iout);
 bool extract_xml_value(XmlRpc::XmlRpcValue& value, double& dout);
 bool extract_xml_value(XmlRpc::XmlRpcValue& value, std::string& sout);
 
+bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Point& p);
+bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Quaternion& q);
+bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Pose& p);
+bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Vector3& v);
+
 template <typename T>
 bool extract_xml_value(XmlRpc::XmlRpcValue& value, std::vector<T>& vout);
 
@@ -68,10 +73,6 @@ bool extract_xml_value(XmlRpc::XmlRpcValue& value, std::map<std::string, T>& mou
 
 template <typename T>
 bool download_param(const ros::NodeHandle& nh, const std::string& param_name, T& tout);
-
-bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Point& p);
-bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Quaternion& q);
-bool extract_xml_value(XmlRpc::XmlRpcValue& value, geometry_msgs::Pose& p);
 
 template <typename T, typename Op>
 bool vector_pwiseop(const std::vector<T>& u, const std::vector<T>& v, std::vector<T>& uv, const Op& op);
