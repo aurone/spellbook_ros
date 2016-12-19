@@ -21,8 +21,8 @@ find_package(
         octomap_ros
         roscpp
         rosbag
-        sbpl_geometry_utils
         sensor_msgs
+        smpl
         std_msgs
         tf
         trajectory_msgs
@@ -41,7 +41,7 @@ catkin_package(
         msg_utils
         costmap_extruder
     CATKIN_DEPENDS
-        sbpl_geometry_utils
+        smpl
     DEPENDS
         Boost
         Eigen)

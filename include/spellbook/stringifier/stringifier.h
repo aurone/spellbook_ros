@@ -8,7 +8,7 @@
 #include <Eigen/Dense>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point32.h>
-#include <sbpl_geometry_utils/utils.h>
+#include <smpl/angles.h>
 #include <visualization_msgs/Marker.h>
 
 ////////////////////////////////
@@ -92,7 +92,7 @@ inline std::string to_string(const Eigen::Vector3d& v)
 inline std::string to_string(const Eigen::AngleAxisd& aa)
 {
     std::stringstream ss;
-    ss << "{ angle: " << sbpl::utils::ToDegrees(aa.angle()) << " degs @ " << to_string(aa.axis()) << " }";
+    ss << "{ angle: " << sbpl::angles::to_degrees(aa.angle()) << " degs @ " << to_string(aa.axis()) << " }";
     return ss.str();
 }
 
