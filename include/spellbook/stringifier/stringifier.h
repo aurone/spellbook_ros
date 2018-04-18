@@ -15,15 +15,12 @@
 /// Because, let's be honest ///
 ////////////////////////////////
 
+namespace std {
+
 template <typename T>
 std::string to_string(const std::vector<T>& v);
 
 std::string to_string(const std::vector<double>& v);
-
-std::string to_string(const Eigen::Affine3d& transform);
-std::string to_string(const Eigen::Vector2d& v);
-std::string to_string(const Eigen::Vector3d& v);
-std::string to_string(const Eigen::AngleAxisd& aa);
 
 template <typename T, std::size_t N>
 std::string to_string(const std::array<T, N>& arr);
@@ -31,9 +28,22 @@ std::string to_string(const std::array<T, N>& arr);
 template <std::size_t N>
 std::string to_string(const std::array<double, N>& arr);
 
-//////////////////////////////////////////////////////////////////////////////////////////
+} // namespace std
+
+namespace Eigen {
+
+std::string to_string(const Eigen::Affine3d& transform);
+std::string to_string(const Eigen::Vector2d& v);
+std::string to_string(const Eigen::Vector3d& v);
+std::string to_string(const Eigen::AngleAxisd& aa);
+
+} // namespace Eigen
+
+////////////////////////////////////////////////////////////////////////////////
 // Implementation
-//////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+namespace std {
 
 template <typename T>
 inline std::string to_string(const std::vector<T>& v)
@@ -63,6 +73,36 @@ inline std::string to_string(const std::vector<double>& vec)
     ss << " ]";
     return ss.str();
 }
+
+template <class T, std::size_t N>
+inline std::string to_string(const std::array<T, N>& arr)
+{
+    std::stringstream ss;
+    ss << "( ";
+    for (std::size_t i = 0; i < N; ++i) {
+        ss << arr[i] << ' ';
+    }
+    ss << ')';
+    return ss.str();
+
+}
+
+template <std::size_t N>
+inline std::string to_string(const std::array<double, N>& arr)
+{
+    std::stringstream ss;
+    ss << std::setprecision(3) << std::setw(8);
+    ss << "( ";
+    for (std::size_t i = 0; i < N; ++i) {
+        ss << arr[i] << ' ';
+    }
+    ss << ')';
+    return ss.str();
+}
+
+} // namespace std
+
+namespace Eigen {
 
 inline std::string to_string(const Eigen::Affine3d& transform)
 {
@@ -96,31 +136,7 @@ inline std::string to_string(const Eigen::AngleAxisd& aa)
     return ss.str();
 }
 
-template <class T, std::size_t N>
-inline std::string to_string(const std::array<T, N>& arr)
-{
-    std::stringstream ss;
-    ss << "( ";
-    for (std::size_t i = 0; i < N; ++i) {
-        ss << arr[i] << ' ';
-    }
-    ss << ')';
-    return ss.str();
-
-}
-
-template <std::size_t N>
-inline std::string to_string(const std::array<double, N>& arr)
-{
-    std::stringstream ss;
-    ss << std::setprecision(3) << std::setw(8);
-    ss << "( ";
-    for (std::size_t i = 0; i < N; ++i) {
-        ss << arr[i] << ' ';
-    }
-    ss << ')';
-    return ss.str();
-}
+} // namespace Eigen
 
 inline const char* visualization_msgs_marker_type_to_cstr(int32_t type)
 {
