@@ -396,7 +396,7 @@ std::vector<double> to_degrees(const std::vector<double>& v)
 {
     std::vector<double> v_degs(v.size());
     for (std::size_t i = 0; i < v.size(); ++i) {
-        v_degs[i] = sbpl::angles::to_degrees(v[i]);
+        v_degs[i] = smpl::to_degrees(v[i]);
     }
     return v_degs;
 }
@@ -405,7 +405,7 @@ std::vector<double> to_radians(const std::vector<double>& v)
 {
     std::vector<double> v_rads(v.size());
     for (std::size_t i = 0; i < v.size(); ++i) {
-        v_rads[i] = sbpl::angles::to_radians(v[i]);
+        v_rads[i] = smpl::to_radians(v[i]);
     }
     return v_rads;
 }

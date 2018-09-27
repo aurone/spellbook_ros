@@ -132,7 +132,7 @@ inline std::string to_string(const Eigen::Vector3d& v)
 inline std::string to_string(const Eigen::AngleAxisd& aa)
 {
     std::stringstream ss;
-    ss << "{ angle: " << sbpl::angles::to_degrees(aa.angle()) << " degs @ " << to_string(aa.axis()) << " }";
+    ss << "{ angle: " << smpl::to_degrees(aa.angle()) << " degs @ " << to_string(aa.axis()) << " }";
     return ss.str();
 }
 

@@ -40,7 +40,7 @@ bool CostmapExtruder::extrude(
     convert(collision_map, octomap_cloud);
 
     octomap::OcTree octree(res);
-    octree.insertScan(octomap_cloud, octomap::point3d(0.0, 0.0, 0.0));
+//    octree.insertScan(octomap_cloud, octomap::point3d(0.0, 0.0, 0.0));
 
     log_octomap(octree);
 
