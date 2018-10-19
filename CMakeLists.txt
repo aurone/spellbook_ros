@@ -19,11 +19,12 @@ find_package(
         roscpp
         rosbag
         sensor_msgs
-        smpl
         std_msgs
         tf
         trajectory_msgs
         visualization_msgs)
+
+find_package(smpl REQUIRED)
 
 find_package(octomap REQUIRED)
 
@@ -41,10 +42,10 @@ catkin_package(
         costmap_extruder
         spellbook
     CATKIN_DEPENDS
-        smpl
     DEPENDS
         Boost
-        OCTOMAP)
+        OCTOMAP
+        smpl)
 
 #####################
 # spellbook library #
